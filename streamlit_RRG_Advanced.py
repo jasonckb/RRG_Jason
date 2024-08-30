@@ -332,7 +332,7 @@ def create_rrg_chart(data, benchmark, sectors, sector_names, universe, timeframe
     return fig
 
 # Main Streamlit app
-st.title("Relative Rotation Graph (RRG) by JC")
+st.title("Jason RRG")
 
 # Initialize session state
 if 'selected_universe' not in st.session_state:
