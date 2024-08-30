@@ -445,10 +445,15 @@ elif selected_universe in ["Existing Portfolio", "Monitoring Portfolio", "US Por
         if ticker:
             if ticker.isalpha():
                 processed_ticker = ticker.upper()
-            elif ticker.isdigit():
-                processed_ticker = f"{ticker.zfill(4)}.HK"
             else:
-                processed_ticker = ticker
+                # Remove any non-digit characters (like '.HK') and convert to integer
+                numeric_part = ''.join(filter(str.isdigit, ticker))
+                if numeric_part:
+                    # Pad with zeros to ensure 4 digits
+                    processed_ticker = f"{int(numeric_part):04d}.HK"
+                else:
+                    # If there are no digits, keep the original ticker
+                    processed_ticker = ticker
             custom_tickers.append(processed_ticker)
     
     st.session_state[f'{portfolio_key}_tickers'] = custom_tickers
