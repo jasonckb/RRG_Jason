@@ -444,7 +444,7 @@ elif selected_universe in ["Existing Portfolio", "Monitoring Portfolio", "US Por
     col1, col2, col3 = st.sidebar.columns(3)
     
     custom_tickers = []
-    for i in range(15):
+    for i in range(21):
         if i % 3 == 0:
             ticker = col1.text_input(f"Stock {i+1}", key=f"{portfolio_key}_stock_{i+1}", value=st.session_state[f'{portfolio_key}_tickers'][i] if i < len(st.session_state[f'{portfolio_key}_tickers']) else "")
         elif i % 3 == 1:
