@@ -282,7 +282,7 @@ def create_rrg_chart(data, benchmark, sectors, sector_names, universe, timeframe
             if universe == "FX":
                 legend_label = f"{sector} ({sector_names.get(sector, '')})"
                 chart_label = sector_names.get(sector, sector)
-            elif universe == "US Sectors" or universe == "HK Sub-indexes" or universe == "Customised Portfolio":
+            elif universe in ["US Sectors", "HK Sub-indexes", "Existing Portfolio", "Monitoring Portfolio", "US Portfolio"]:
                 legend_label = sector
                 chart_label = sector.replace('.HK', '')
             else:
@@ -338,6 +338,7 @@ def create_rrg_chart(data, benchmark, sectors, sector_names, universe, timeframe
     fig.add_annotation(x=max_x, y=max_y, text="領先", showarrow=False, font=label_font, xanchor="right", yanchor="top")
 
     return fig
+
 
 
 # Main Streamlit app
