@@ -441,28 +441,40 @@ elif selected_universe in ["Existing Portfolio", "Monitoring Portfolio", "US Por
     if f'{portfolio_key}_tickers' not in st.session_state or st.session_state.reset_tickers:
         st.session_state[f'{portfolio_key}_tickers'] = get_preset_portfolio(selected_universe.split()[0])
 
-    col1, col2, col3 = st.sidebar.columns(3)
+    # Determine the number of tickers to display
+    num_tickers = len(st.session_state[f'{portfolio_key}_tickers'])
+    num_tickers = max(num_tickers, 30)  # Ensure at least 30 input fields
+
+    # Calculate the number of columns needed
+    num_columns = (num_tickers + 2) // 3  # Round up to the nearest multiple of 3
+
+    # Create columns
+    columns = st.sidebar.columns(3)
     
     custom_tickers = []
-    for i in range(21):
-        if i % 3 == 0:
-            ticker = col1.text_input(f"Stock {i+1}", key=f"{portfolio_key}_stock_{i+1}", value=st.session_state[f'{portfolio_key}_tickers'][i] if i < len(st.session_state[f'{portfolio_key}_tickers']) else "")
-        elif i % 3 == 1:
-            ticker = col2.text_input(f"Stock {i+1}", key=f"{portfolio_key}_stock_{i+1}", value=st.session_state[f'{portfolio_key}_tickers'][i] if i < len(st.session_state[f'{portfolio_key}_tickers']) else "")
+    for i in range(num_columns * 3):  # This ensures we always have a multiple of 3 input fields
+        col_index = i % 3
+        if i < num_tickers:
+            ticker = columns[col_index].text_input(
+                f"Stock {i+1}", 
+                key=f"{portfolio_key}_stock_{i+1}", 
+                value=st.session_state[f'{portfolio_key}_tickers'][i] if i < len(st.session_state[f'{portfolio_key}_tickers']) else ""
+            )
         else:
-            ticker = col3.text_input(f"Stock {i+1}", key=f"{portfolio_key}_stock_{i+1}", value=st.session_state[f'{portfolio_key}_tickers'][i] if i < len(st.session_state[f'{portfolio_key}_tickers']) else "")
+            ticker = columns[col_index].text_input(
+                f"Stock {i+1}", 
+                key=f"{portfolio_key}_stock_{i+1}", 
+                value=""
+            )
         
         if ticker:
             if ticker.isalpha():
                 processed_ticker = ticker.upper()
             else:
-                # Remove any non-digit characters (like '.HK') and convert to integer
                 numeric_part = ''.join(filter(str.isdigit, ticker))
                 if numeric_part:
-                    # Pad with zeros to ensure 4 digits
                     processed_ticker = f"{int(numeric_part):04d}.HK"
                 else:
-                    # If there are no digits, keep the original ticker
                     processed_ticker = ticker
             custom_tickers.append(processed_ticker)
     
@@ -482,6 +494,7 @@ elif selected_universe in ["Existing Portfolio", "Monitoring Portfolio", "US Por
     # Reset the flag after use
     if st.session_state.reset_tickers:
         st.session_state.reset_tickers = False
+
 
 # Main content area
 if selected_universe:
