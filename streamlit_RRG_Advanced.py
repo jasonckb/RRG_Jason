@@ -282,7 +282,7 @@ def create_rrg_chart(data, benchmark, sectors, sector_names, universe, timeframe
             if universe == "FX":
                 legend_label = f"{sector} ({sector_names.get(sector, '')})"
                 chart_label = sector_names.get(sector, sector)
-            elif universe in ["US Sectors", "HK Sub-indexes", "Existing Portfolio", "Monitoring Portfolio", "US Portfolio"]:
+            elif universe == "US Sectors" or universe == "HK Sub-indexes" or universe == "Customised Portfolio":
                 legend_label = sector
                 chart_label = sector.replace('.HK', '')
             else:
@@ -295,11 +295,19 @@ def create_rrg_chart(data, benchmark, sectors, sector_names, universe, timeframe
                 legendgroup=sector, showlegend=True
             ))
             
+            # Determine text position based on momentum comparison
+            if len(y_values) > 1:
+                current_momentum = y_values.iloc[-1]
+                last_momentum = y_values.iloc[-2]
+                text_position = "top center" if current_momentum > last_momentum else "bottom center"
+            else:
+                text_position = "top center"
+            
             # Add only the latest point as a larger marker with text
             fig.add_trace(go.Scatter(
                 x=[x_values.iloc[-1]], y=[y_values.iloc[-1]], mode='markers+text',
                 name=f"{sector} (latest)", marker=dict(color=color, size=12, symbol='circle'),
-                text=[chart_label], textposition="top center", legendgroup=sector, showlegend=False,
+                text=[chart_label], textposition=text_position, legendgroup=sector, showlegend=False,
                 textfont=dict(color='black', size=12, family='Arial Black')
             ))
 
@@ -330,6 +338,7 @@ def create_rrg_chart(data, benchmark, sectors, sector_names, universe, timeframe
     fig.add_annotation(x=max_x, y=max_y, text="領先", showarrow=False, font=label_font, xanchor="right", yanchor="top")
 
     return fig
+
 
 # Main Streamlit app
 st.title("Jason RRG")
