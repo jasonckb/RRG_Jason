@@ -256,8 +256,8 @@ def create_rrg_chart(data, benchmark, sectors, sector_names, universe, timeframe
 
     range_x = max_x - min_x
     range_y = max_y - min_y
-    min_x = max(min_x - range_x * padding, 70)
-    max_x = min(max_x + range_x * padding, 130)
+    min_x = max(min_x - range_x * padding, 60)
+    max_x = min(max_x + range_x * padding, 140)
     min_y = max(min_y - range_y * padding, 70)
     max_y = min(max_y + range_y * padding, 130)
 
@@ -443,7 +443,7 @@ elif selected_universe in ["Existing Portfolio", "Monitoring Portfolio", "US Por
 
     # Determine the number of tickers to display
     num_tickers = len(st.session_state[f'{portfolio_key}_tickers'])
-    num_tickers = max(num_tickers, 30)  # Ensure at least 30 input fields
+    num_tickers = max(num_tickers, 21)  # Ensure at least 30 input fields
 
     # Calculate the number of columns needed
     num_columns = (num_tickers + 2) // 3  # Round up to the nearest multiple of 3
