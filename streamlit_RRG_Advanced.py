@@ -80,12 +80,11 @@ def calculate_rrg_values(data, benchmark):
 
 @st.cache_data
 def get_data(universe, sector, timeframe, custom_tickers=None, custom_benchmark=None):
-    end_date = datetime.utcnow()
+    end_date = datetime.utcnow().replace(tzinfo=None)
     if timeframe == "Weekly":
         start_date = end_date - timedelta(weeks=100)
     else:  # Daily
         start_date = end_date - timedelta(days=500)
-
 
     sector_universes = {
         "US": {
@@ -178,6 +177,9 @@ def get_data(universe, sector, timeframe, custom_tickers=None, custom_benchmark=
         
         data = yf.download(tickers_to_download, start=start_date, end=buffer_end_date)['Close']
         
+        # Convert index to naive datetime objects
+        data.index = data.index.tz_localize(None)
+        
         # Check the actual date range of the downloaded data
         actual_start_date = data.index.min()
         actual_end_date = data.index.max()
@@ -208,6 +210,7 @@ def get_data(universe, sector, timeframe, custom_tickers=None, custom_benchmark=
                     st.info("Attempting to download alternative for ^TWII: TAIEX")
                     twii_data = yf.download("TAIEX", start=start_date, end=buffer_end_date)['Close']
                     if not twii_data.empty:
+                        twii_data.index = twii_data.index.tz_localize(None)
                         data["^TWII"] = twii_data
                         missing_tickers.remove("^TWII")
                         st.success("Successfully downloaded TAIEX as a proxy for ^TWII")
@@ -216,6 +219,7 @@ def get_data(universe, sector, timeframe, custom_tickers=None, custom_benchmark=
                     st.info("Attempting to download alternative for 3032.HK: ^HSTECH")
                     hstech_data = yf.download("^HSTECH", start=start_date, end=buffer_end_date)['Close']
                     if not hstech_data.empty:
+                        hstech_data.index = hstech_data.index.tz_localize(None)
                         data["3032.HK"] = hstech_data
                         missing_tickers.remove("3032.HK")
                         st.success("Successfully downloaded ^HSTECH as a proxy for 3032.HK")
@@ -248,6 +252,7 @@ def get_data(universe, sector, timeframe, custom_tickers=None, custom_benchmark=
 
     st.success(f"Successfully downloaded data for {len(data.columns)} tickers.")
     return data, benchmark, sectors, sector_names
+
 
 
 def create_rrg_chart(data, benchmark, sectors, sector_names, universe, timeframe, tail_length):
