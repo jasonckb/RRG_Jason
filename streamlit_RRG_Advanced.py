@@ -80,11 +80,12 @@ def calculate_rrg_values(data, benchmark):
 
 @st.cache_data
 def get_data(universe, sector, timeframe, custom_tickers=None, custom_benchmark=None):
-    end_date = datetime.now(timezone.utc)
+    end_date = datetime.utcnow()
     if timeframe == "Weekly":
         start_date = end_date - timedelta(weeks=100)
     else:  # Daily
         start_date = end_date - timedelta(days=500)
+
 
     sector_universes = {
         "US": {
