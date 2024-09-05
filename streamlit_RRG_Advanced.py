@@ -247,28 +247,6 @@ def get_data(universe, sector, timeframe, custom_tickers=None, custom_benchmark=
 
     st.success(f"Successfully downloaded data for {len(data.columns)} tickers.")
     return data, benchmark, sectors, sector_names
-        
-        # Remove columns with all NaN values
-        data = data.dropna(axis=1, how='all')
-        
-        if benchmark not in data.columns:
-            st.error(f"No data available for the benchmark {benchmark}. Please choose a different benchmark.")
-            return None, benchmark, sectors, sector_names
-        
-        valid_sectors = [s for s in sectors if s in data.columns]
-        if len(valid_sectors) == 0:
-            st.error("No valid sector data available. Please check your input and try again.")
-            return None, benchmark, sectors, sector_names
-        
-        sectors = valid_sectors
-        sector_names = {s: sector_names[s] for s in valid_sectors if s in sector_names}
-        
-    except Exception as e:
-        st.error(f"Error fetching data: {str(e)}")
-        return None, benchmark, sectors, sector_names
-
-    st.success(f"Successfully downloaded data for {len(data.columns)} tickers.")
-    return data, benchmark, sectors, sector_names
 
 
 def create_rrg_chart(data, benchmark, sectors, sector_names, universe, timeframe, tail_length):
