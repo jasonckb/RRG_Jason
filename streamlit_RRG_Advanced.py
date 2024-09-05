@@ -191,11 +191,16 @@ def get_data(universe, sector, timeframe, custom_tickers=None, custom_benchmark=
         
         # Get the last available date for each ticker
         last_available_dates = data.apply(lambda col: col.last_valid_index())
-        
-        # Display information about the last available date for each ticker
-        st.info("Last available date for each ticker:")
-        for ticker, last_date in last_available_dates.items():
-            st.info(f"{ticker}: {last_date.date() if last_date else 'No data'}")
+        most_common_date = last_available_dates.value_counts().index[0]
+
+        st.info(f"Most recent data available: {most_common_date.date()}")
+
+        # Check if all dates are the same
+        if len(last_available_dates.unique()) > 1:
+            st.info("Some tickers have different last available dates:")
+            different_dates = last_available_dates[last_available_dates != most_common_date]
+            for ticker, date in different_dates.items():
+                st.info(f"{ticker}: {date.date()}")
         
         if data.index.max() < end_date - timedelta(days=1):
             st.warning(f"The most recent data available is from {data.index.max().date()}. "
