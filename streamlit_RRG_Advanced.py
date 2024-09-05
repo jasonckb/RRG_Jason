@@ -80,7 +80,7 @@ def calculate_rrg_values(data, benchmark):
 
 @st.cache_data
 def get_data(universe, sector, timeframe, custom_tickers=None, custom_benchmark=None):
-    end_date = datetime.now()
+    end_date = datetime.now(timezone.utc)
     if timeframe == "Weekly":
         start_date = end_date - timedelta(weeks=100)
     else:  # Daily
@@ -194,7 +194,7 @@ def get_data(universe, sector, timeframe, custom_tickers=None, custom_benchmark=
         for ticker, last_date in last_available_dates.items():
             st.info(f"{ticker}: {last_date.date() if last_date else 'No data'}")
         
-        if data.index.max().date() < end_date.date() - timedelta(days=1):
+        if data.index.max() < end_date - timedelta(days=1):
             st.warning(f"The most recent data available is from {data.index.max().date()}. "
                        f"This may be due to market holidays, time zone differences, or delays in data updates.")
         
@@ -225,6 +225,28 @@ def get_data(universe, sector, timeframe, custom_tickers=None, custom_benchmark=
         if data.empty:
             st.error(f"No data available for the selected universe and sector.")
             return None, benchmark, sectors, sector_names
+        
+        # Remove columns with all NaN values
+        data = data.dropna(axis=1, how='all')
+        
+        if benchmark not in data.columns:
+            st.error(f"No data available for the benchmark {benchmark}. Please choose a different benchmark.")
+            return None, benchmark, sectors, sector_names
+        
+        valid_sectors = [s for s in sectors if s in data.columns]
+        if len(valid_sectors) == 0:
+            st.error("No valid sector data available. Please check your input and try again.")
+            return None, benchmark, sectors, sector_names
+        
+        sectors = valid_sectors
+        sector_names = {s: sector_names[s] for s in valid_sectors if s in sector_names}
+        
+    except Exception as e:
+        st.error(f"Error fetching data: {str(e)}")
+        return None, benchmark, sectors, sector_names
+
+    st.success(f"Successfully downloaded data for {len(data.columns)} tickers.")
+    return data, benchmark, sectors, sector_names
         
         # Remove columns with all NaN values
         data = data.dropna(axis=1, how='all')
