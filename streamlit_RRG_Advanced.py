@@ -172,17 +172,31 @@ def get_data(universe, sector, timeframe, custom_tickers=None, custom_benchmark=
         tickers_to_download = [benchmark] + sectors
         st.info(f"Attempting to download data for: {', '.join(tickers_to_download)}")
         
-        data = yf.download(tickers_to_download, start=start_date, end=end_date)['Close']
+        # Add a buffer of 5 days to the end date to account for time zone differences
+        buffer_end_date = end_date + timedelta(days=5)
+        
+        data = yf.download(tickers_to_download, start=start_date, end=buffer_end_date)['Close']
         
         # Check the actual date range of the downloaded data
         actual_start_date = data.index.min()
         actual_end_date = data.index.max()
         
-        st.info(f"Data available from {actual_start_date.date()} to {actual_end_date.date()}")
+        st.info(f"Raw data available from {actual_start_date.date()} to {actual_end_date.date()}")
         
-        if actual_end_date.date() < end_date.date() - timedelta(days=1):
-            st.warning(f"The most recent data available is from {actual_end_date.date()}. "
-                       f"This may be due to market holidays or delays in data updates.")
+        # Filter the data to remove future dates
+        data = data[data.index <= end_date]
+        
+        # Get the last available date for each ticker
+        last_available_dates = data.apply(lambda col: col.last_valid_index())
+        
+        # Display information about the last available date for each ticker
+        st.info("Last available date for each ticker:")
+        for ticker, last_date in last_available_dates.items():
+            st.info(f"{ticker}: {last_date.date() if last_date else 'No data'}")
+        
+        if data.index.max().date() < end_date.date() - timedelta(days=1):
+            st.warning(f"The most recent data available is from {data.index.max().date()}. "
+                       f"This may be due to market holidays, time zone differences, or delays in data updates.")
         
         missing_tickers = set(tickers_to_download) - set(data.columns)
         if missing_tickers:
@@ -191,7 +205,7 @@ def get_data(universe, sector, timeframe, custom_tickers=None, custom_benchmark=
             if universe == "WORLD":
                 if "^TWII" in missing_tickers:
                     st.info("Attempting to download alternative for ^TWII: TAIEX")
-                    twii_data = yf.download("TAIEX", start=start_date, end=end_date)['Close']
+                    twii_data = yf.download("TAIEX", start=start_date, end=buffer_end_date)['Close']
                     if not twii_data.empty:
                         data["^TWII"] = twii_data
                         missing_tickers.remove("^TWII")
@@ -199,7 +213,7 @@ def get_data(universe, sector, timeframe, custom_tickers=None, custom_benchmark=
                 
                 if "3032.HK" in missing_tickers:
                     st.info("Attempting to download alternative for 3032.HK: ^HSTECH")
-                    hstech_data = yf.download("^HSTECH", start=start_date, end=end_date)['Close']
+                    hstech_data = yf.download("^HSTECH", start=start_date, end=buffer_end_date)['Close']
                     if not hstech_data.empty:
                         data["3032.HK"] = hstech_data
                         missing_tickers.remove("3032.HK")
@@ -212,6 +226,7 @@ def get_data(universe, sector, timeframe, custom_tickers=None, custom_benchmark=
             st.error(f"No data available for the selected universe and sector.")
             return None, benchmark, sectors, sector_names
         
+        # Remove columns with all NaN values
         data = data.dropna(axis=1, how='all')
         
         if benchmark not in data.columns:
@@ -232,6 +247,7 @@ def get_data(universe, sector, timeframe, custom_tickers=None, custom_benchmark=
 
     st.success(f"Successfully downloaded data for {len(data.columns)} tickers.")
     return data, benchmark, sectors, sector_names
+
 
 def create_rrg_chart(data, benchmark, sectors, sector_names, universe, timeframe, tail_length):
     if timeframe == "Weekly":
