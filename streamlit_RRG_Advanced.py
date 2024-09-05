@@ -80,7 +80,7 @@ def calculate_rrg_values(data, benchmark):
 
 @st.cache_data
 def get_data(universe, sector, timeframe, custom_tickers=None, custom_benchmark=None):
-    end_date = datetime.utcnow().replace(tzinfo=None)
+    end_date = datetime.now()
     if timeframe == "Weekly":
         start_date = end_date - timedelta(weeks=100)
     else:  # Daily
@@ -172,39 +172,17 @@ def get_data(universe, sector, timeframe, custom_tickers=None, custom_benchmark=
         tickers_to_download = [benchmark] + sectors
         st.info(f"Attempting to download data for: {', '.join(tickers_to_download)}")
         
-        # Add a buffer of 5 days to the end date to account for time zone differences
-        buffer_end_date = end_date + timedelta(days=5)
-        
-        data = yf.download(tickers_to_download, start=start_date, end=buffer_end_date)['Close']
-        
-        # Convert index to naive datetime objects
-        data.index = data.index.tz_localize(None)
+        data = yf.download(tickers_to_download, start=start_date, end=end_date)['Close']
         
         # Check the actual date range of the downloaded data
         actual_start_date = data.index.min()
         actual_end_date = data.index.max()
         
-        st.info(f"Raw data available from {actual_start_date.date()} to {actual_end_date.date()}")
+        st.info(f"Data available from {actual_start_date.date()} to {actual_end_date.date()}")
         
-        # Filter the data to remove future dates
-        data = data[data.index <= end_date]
-        
-        # Get the last available date for each ticker
-        last_available_dates = data.apply(lambda col: col.last_valid_index())
-        most_common_date = last_available_dates.value_counts().index[0]
-
-        st.info(f"Most recent data available: {most_common_date.date()}")
-
-        # Check if all dates are the same
-        if len(last_available_dates.unique()) > 1:
-            st.info("Some tickers have different last available dates:")
-            different_dates = last_available_dates[last_available_dates != most_common_date]
-            for ticker, date in different_dates.items():
-                st.info(f"{ticker}: {date.date()}")
-        
-        if data.index.max() < end_date - timedelta(days=1):
-            st.warning(f"The most recent data available is from {data.index.max().date()}. "
-                       f"This may be due to market holidays, time zone differences, or delays in data updates.")
+        if actual_end_date.date() < end_date.date() - timedelta(days=1):
+            st.warning(f"The most recent data available is from {actual_end_date.date()}. "
+                       f"This may be due to market holidays or delays in data updates.")
         
         missing_tickers = set(tickers_to_download) - set(data.columns)
         if missing_tickers:
@@ -213,18 +191,16 @@ def get_data(universe, sector, timeframe, custom_tickers=None, custom_benchmark=
             if universe == "WORLD":
                 if "^TWII" in missing_tickers:
                     st.info("Attempting to download alternative for ^TWII: TAIEX")
-                    twii_data = yf.download("TAIEX", start=start_date, end=buffer_end_date)['Close']
+                    twii_data = yf.download("TAIEX", start=start_date, end=end_date)['Close']
                     if not twii_data.empty:
-                        twii_data.index = twii_data.index.tz_localize(None)
                         data["^TWII"] = twii_data
                         missing_tickers.remove("^TWII")
                         st.success("Successfully downloaded TAIEX as a proxy for ^TWII")
                 
                 if "3032.HK" in missing_tickers:
                     st.info("Attempting to download alternative for 3032.HK: ^HSTECH")
-                    hstech_data = yf.download("^HSTECH", start=start_date, end=buffer_end_date)['Close']
+                    hstech_data = yf.download("^HSTECH", start=start_date, end=end_date)['Close']
                     if not hstech_data.empty:
-                        hstech_data.index = hstech_data.index.tz_localize(None)
                         data["3032.HK"] = hstech_data
                         missing_tickers.remove("3032.HK")
                         st.success("Successfully downloaded ^HSTECH as a proxy for 3032.HK")
@@ -236,7 +212,6 @@ def get_data(universe, sector, timeframe, custom_tickers=None, custom_benchmark=
             st.error(f"No data available for the selected universe and sector.")
             return None, benchmark, sectors, sector_names
         
-        # Remove columns with all NaN values
         data = data.dropna(axis=1, how='all')
         
         if benchmark not in data.columns:
@@ -257,8 +232,6 @@ def get_data(universe, sector, timeframe, custom_tickers=None, custom_benchmark=
 
     st.success(f"Successfully downloaded data for {len(data.columns)} tickers.")
     return data, benchmark, sectors, sector_names
-
-
 
 def create_rrg_chart(data, benchmark, sectors, sector_names, universe, timeframe, tail_length):
     if timeframe == "Weekly":
