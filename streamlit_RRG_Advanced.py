@@ -237,7 +237,7 @@ def create_rrg_chart(data, benchmark, sectors, sector_names, universe, timeframe
     if timeframe == "Weekly":
         data_resampled = data.resample('W-FRI').last()
     else:  # Daily
-        data_resampled = data  # Remove resampling for daily data
+        data_resampled = data  # No resampling for daily data
 
     rrg_data = pd.DataFrame()
     for sector in sectors:
@@ -245,9 +245,12 @@ def create_rrg_chart(data, benchmark, sectors, sector_names, universe, timeframe
         rrg_data[f"{sector}_RS-Ratio"] = rs_ratio
         rrg_data[f"{sector}_RS-Momentum"] = rs_momentum
 
-    # Use a sliding window for boundary calculation
-    window_size = 30 if timeframe == "Daily" else 10
-    boundary_data = rrg_data.iloc[-window_size:]
+    # Use tail_length for both plotting and boundary calculation
+    plot_data = rrg_data.iloc[-tail_length:]
+    
+    # For boundary calculation, use a minimum of 30 points or tail_length, whichever is larger
+    boundary_length = max(30, tail_length)
+    boundary_data = rrg_data.iloc[-boundary_length:]
     
     padding = 0.1
     min_x = boundary_data[[f"{sector}_RS-Ratio" for sector in sectors]].min().min()
@@ -257,8 +260,8 @@ def create_rrg_chart(data, benchmark, sectors, sector_names, universe, timeframe
 
     range_x = max_x - min_x
     range_y = max_y - min_y
-    min_x = max(min_x - range_x * padding, 60)
-    max_x = min(max_x + range_x * padding, 140)
+    min_x = max(min_x - range_x * padding, 70)
+    max_x = min(max_x + range_x * padding, 130)
     min_y = max(min_y - range_y * padding, 70)
     max_y = min(max_y + range_y * padding, 130)
 
@@ -274,8 +277,8 @@ def create_rrg_chart(data, benchmark, sectors, sector_names, universe, timeframe
         else: return "Leading"
 
     for sector in sectors:
-        x_values = rrg_data[f"{sector}_RS-Ratio"].iloc[-tail_length:].dropna()
-        y_values = rrg_data[f"{sector}_RS-Momentum"].iloc[-tail_length:].dropna()
+        x_values = plot_data[f"{sector}_RS-Ratio"].dropna()
+        y_values = plot_data[f"{sector}_RS-Momentum"].dropna()
         if len(x_values) > 0 and len(y_values) > 0:
             current_quadrant = get_quadrant(x_values.iloc[-1], y_values.iloc[-1])
             color = curve_colors[current_quadrant]
