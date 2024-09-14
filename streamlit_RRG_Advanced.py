@@ -379,8 +379,7 @@ def create_rrg_chart(data, benchmark, sectors, sector_names, universe, timeframe
     fig.add_annotation(x=min_x, y=max_y, text="改善", showarrow=False, font=label_font, xanchor="left", yanchor="top")
     fig.add_annotation(x=max_x, y=max_y, text="領先", showarrow=False, font=label_font, xanchor="right", yanchor="top")
 
-    else:
-            st.write(f"Debug: Skipping sector {sector} due to insufficient data")
+    
 
     return fig
 
