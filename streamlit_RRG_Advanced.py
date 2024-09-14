@@ -234,10 +234,15 @@ def get_data(universe, sector, timeframe, custom_tickers=None, custom_benchmark=
     return data, benchmark, sectors, sector_names
 
 def create_rrg_chart(data, benchmark, sectors, sector_names, universe, timeframe, tail_length):
+    st.write(f"Debug: Timeframe = {timeframe}, Tail Length = {tail_length}")
+    st.write(f"Debug: Data shape = {data.shape}")
+    
     if timeframe == "Weekly":
         data_resampled = data.resample('W-FRI').last()
     else:  # Daily
-        data_resampled = data  # No resampling for daily data
+        data_resampled = data
+
+    st.write(f"Debug: Resampled data shape = {data_resampled.shape}")
 
     rrg_data = pd.DataFrame()
     for sector in sectors:
@@ -245,8 +250,11 @@ def create_rrg_chart(data, benchmark, sectors, sector_names, universe, timeframe
         rrg_data[f"{sector}_RS-Ratio"] = rs_ratio
         rrg_data[f"{sector}_RS-Momentum"] = rs_momentum
 
+    st.write(f"Debug: RRG data shape = {rrg_data.shape}")
+
     # Use tail_length for both plotting and boundary calculation
     plot_data = rrg_data.iloc[-tail_length:]
+    st.write(f"Debug: Plot data shape = {plot_data.shape}")
     
     # For boundary calculation, use a minimum of 30 points or tail_length, whichever is larger
     boundary_length = max(30, tail_length)
@@ -260,10 +268,12 @@ def create_rrg_chart(data, benchmark, sectors, sector_names, universe, timeframe
 
     range_x = max_x - min_x
     range_y = max_y - min_y
-    min_x = max(min_x - range_x * padding, 95)
-    max_x = min(max_x + range_x * padding, 105)
-    min_y = max(min_y - range_y * padding, 95)
-    max_y = min(max_y + range_y * padding, 105)
+    min_x = max(min_x - range_x * padding, 97)
+    max_x = min(max_x + range_x * padding, 103)
+    min_y = max(min_y - range_y * padding, 97)
+    max_y = min(max_y + range_y * padding, 103)
+
+    st.write(f"Debug: Chart boundaries - X: ({min_x}, {max_x}), Y: ({min_y}, {max_y})")
 
     fig = go.Figure()
 
@@ -279,6 +289,8 @@ def create_rrg_chart(data, benchmark, sectors, sector_names, universe, timeframe
     for sector in sectors:
         x_values = plot_data[f"{sector}_RS-Ratio"].dropna()
         y_values = plot_data[f"{sector}_RS-Momentum"].dropna()
+        st.write(f"Debug: Sector {sector} - X values: {len(x_values)}, Y values: {len(y_values)}")
+        
         if len(x_values) > 0 and len(y_values) > 0:
             current_quadrant = get_quadrant(x_values.iloc[-1], y_values.iloc[-1])
             color = curve_colors[current_quadrant]
