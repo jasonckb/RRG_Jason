@@ -253,7 +253,7 @@ def create_rrg_chart(data, benchmark, sectors, sector_names, universe, timeframe
 
     plot_data = rrg_data.iloc[-tail_length:]
     
-    boundary_length = max(30, tail_length)
+    boundary_length = max(6, tail_length)
     boundary_data = rrg_data.iloc[-boundary_length:]
     
     padding = 0.05
