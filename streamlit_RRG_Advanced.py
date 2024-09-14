@@ -64,19 +64,43 @@ def refresh_data():
         st.session_state.data_refreshed = False
 
 @st.cache_data
-def ma(data, period):
-    return data.rolling(window=period).mean()
-
-@st.cache_data
 def calculate_rrg_values(data, benchmark):
+    st.write(f"Debug: calculate_rrg_values input shapes - data: {data.shape}, benchmark: {benchmark.shape}")
+    
+    # Check for NaN values
+    st.write(f"Debug: NaN values in data: {data.isna().sum()}, in benchmark: {benchmark.isna().sum()}")
+    
+    # Ensure data and benchmark are aligned
+    aligned_data = pd.concat([data, benchmark], axis=1).dropna()
+    st.write(f"Debug: Aligned data shape: {aligned_data.shape}")
+    
+    data = aligned_data.iloc[:, 0]
+    benchmark = aligned_data.iloc[:, 1]
+
     sbr = data / benchmark
+    st.write(f"Debug: SBR shape: {sbr.shape}, NaN values: {sbr.isna().sum()}")
+
     rs1 = ma(sbr, 10)
     rs2 = ma(sbr, 26)
+    st.write(f"Debug: RS1 shape: {rs1.shape}, NaN values: {rs1.isna().sum()}")
+    st.write(f"Debug: RS2 shape: {rs2.shape}, NaN values: {rs2.isna().sum()}")
+
     rs = 100 * ((rs1 - rs2) / rs2 + 1)
+    st.write(f"Debug: RS shape: {rs.shape}, NaN values: {rs.isna().sum()}")
+
     rm1 = ma(rs, 1)
     rm2 = ma(rs, 4)
+    st.write(f"Debug: RM1 shape: {rm1.shape}, NaN values: {rm1.isna().sum()}")
+    st.write(f"Debug: RM2 shape: {rm2.shape}, NaN values: {rm2.isna().sum()}")
+
     rm = 100 * ((rm1 - rm2) / rm2 + 1)
+    st.write(f"Debug: RM shape: {rm.shape}, NaN values: {rm.isna().sum()}")
+
     return rs, rm
+
+@st.cache_data
+def ma(data, period):
+    return data.rolling(window=period).mean()
 
 @st.cache_data
 def get_data(universe, sector, timeframe, custom_tickers=None, custom_benchmark=None):
@@ -290,6 +314,8 @@ def create_rrg_chart(data, benchmark, sectors, sector_names, universe, timeframe
         x_values = plot_data[f"{sector}_RS-Ratio"].dropna()
         y_values = plot_data[f"{sector}_RS-Momentum"].dropna()
         st.write(f"Debug: Sector {sector} - X values: {len(x_values)}, Y values: {len(y_values)}")
+        st.write(f"Debug: X values: {x_values.tolist()}")
+        st.write(f"Debug: Y values: {y_values.tolist()}")
         
         if len(x_values) > 0 and len(y_values) > 0:
             current_quadrant = get_quadrant(x_values.iloc[-1], y_values.iloc[-1])
@@ -352,6 +378,9 @@ def create_rrg_chart(data, benchmark, sectors, sector_names, universe, timeframe
     fig.add_annotation(x=max_x, y=min_y, text="轉弱", showarrow=False, font=label_font, xanchor="right", yanchor="bottom")
     fig.add_annotation(x=min_x, y=max_y, text="改善", showarrow=False, font=label_font, xanchor="left", yanchor="top")
     fig.add_annotation(x=max_x, y=max_y, text="領先", showarrow=False, font=label_font, xanchor="right", yanchor="top")
+
+    else:
+            st.write(f"Debug: Skipping sector {sector} due to insufficient data")
 
     return fig
 
