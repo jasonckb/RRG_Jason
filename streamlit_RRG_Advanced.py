@@ -256,7 +256,7 @@ def create_rrg_chart(data, benchmark, sectors, sector_names, universe, timeframe
     boundary_length = max(30, tail_length)
     boundary_data = rrg_data.iloc[-boundary_length:]
     
-    padding = 0.15
+    padding = 0.05
     min_x = boundary_data[[f"{sector}_RS-Ratio" for sector in sectors]].min().min()
     max_x = boundary_data[[f"{sector}_RS-Ratio" for sector in sectors]].max().max()
     min_y = boundary_data[[f"{sector}_RS-Momentum" for sector in sectors]].min().min()
@@ -264,10 +264,10 @@ def create_rrg_chart(data, benchmark, sectors, sector_names, universe, timeframe
 
     range_x = max_x - min_x
     range_y = max_y - min_y
-    min_x = max(min_x - range_x * padding, 75)
-    max_x = min(max_x + range_x * padding, 125)
-    min_y = max(min_y - range_y * padding, 75)
-    max_y = min(max_y + range_y * padding, 125)
+    min_x = max(min_x - range_x * padding, 80)
+    max_x = min(max_x + range_x * padding, 120)
+    min_y = max(min_y - range_y * padding, 80)
+    max_y = min(max_y + range_y * padding, 120)
 
     fig = go.Figure()
 
@@ -347,8 +347,6 @@ def create_rrg_chart(data, benchmark, sectors, sector_names, universe, timeframe
     
 
     return fig
-
-
 
 # Main Streamlit app
 st.title("Jason RRG")
