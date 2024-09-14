@@ -264,10 +264,10 @@ def create_rrg_chart(data, benchmark, sectors, sector_names, universe, timeframe
 
     range_x = max_x - min_x
     range_y = max_y - min_y
-    min_x = max(min_x - range_x * padding, 97)
-    max_x = min(max_x + range_x * padding, 103)
-    min_y = max(min_y - range_y * padding, 97)
-    max_y = min(max_y + range_y * padding, 103)
+    min_x = max(min_x - range_x * padding, 70)
+    max_x = min(max_x + range_x * padding, 130)
+    min_y = max(min_y - range_y * padding, 70)
+    max_y = min(max_y + range_y * padding, 130)
 
     fig = go.Figure()
 
