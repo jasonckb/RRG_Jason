@@ -256,7 +256,7 @@ def create_rrg_chart(data, benchmark, sectors, sector_names, universe, timeframe
     boundary_length = max(30, tail_length)
     boundary_data = rrg_data.iloc[-boundary_length:]
     
-    padding = 0.1
+    padding = 0.15
     min_x = boundary_data[[f"{sector}_RS-Ratio" for sector in sectors]].min().min()
     max_x = boundary_data[[f"{sector}_RS-Ratio" for sector in sectors]].max().max()
     min_y = boundary_data[[f"{sector}_RS-Momentum" for sector in sectors]].min().min()
@@ -264,10 +264,10 @@ def create_rrg_chart(data, benchmark, sectors, sector_names, universe, timeframe
 
     range_x = max_x - min_x
     range_y = max_y - min_y
-    min_x = max(min_x - range_x * padding, 70)
-    max_x = min(max_x + range_x * padding, 130)
-    min_y = max(min_y - range_y * padding, 70)
-    max_y = min(max_y + range_y * padding, 130)
+    min_x = max(min_x - range_x * padding, 95)
+    max_x = min(max_x + range_x * padding, 105)
+    min_y = max(min_y - range_y * padding, 95)
+    max_y = min(max_y + range_y * padding, 105)
 
     fig = go.Figure()
 
