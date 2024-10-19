@@ -34,7 +34,7 @@ def get_preset_portfolio(portfolio_type):
         "Existing": "https://raw.githubusercontent.com/jasonckb/RRG_Jason/main/Existing%20Portfolio.txt",
         "Monitoring": "https://raw.githubusercontent.com/jasonckb/RRG_Jason/main/Monitoring%20Portfolio.txt",
         "US": "https://raw.githubusercontent.com/jasonckb/RRG_Jason/main/US%20Portfolio.txt",
-        "Screener": "https://raw.githubusercontent.com/jasonckb/RRG_Jason/main/Screener%20List"
+        "Screener": "https://raw.githubusercontent.com/jasonckb/RRG_Jason/main/Screener%20List.txt"
     }
     try:
         return fetch_portfolio_from_github(urls[portfolio_type])
