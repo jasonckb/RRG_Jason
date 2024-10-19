@@ -292,7 +292,7 @@ def create_rrg_chart(data, benchmark, sectors, sector_names, universe, timeframe
             if universe == "FX":
                 legend_label = f"{sector} ({sector_names.get(sector, '')})"
                 chart_label = sector_names.get(sector, sector)
-            elif universe in ["US Sectors", "HK Sub-indexes", "Existing Portfolio", "Monitoring Portfolio", "US Portfolio"]:
+            elif universe in ["US Sectors", "HK Sub-indexes", "Existing Portfolio", "Monitoring Portfolio","Screener List", "US Portfolio"]:
                 legend_label = sector
                 chart_label = sector.replace('.HK', '')
             else:
