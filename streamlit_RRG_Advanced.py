@@ -155,7 +155,7 @@ def get_data(universe, sector, timeframe, custom_tickers=None, custom_benchmark=
         else:
             st.error("Please select a HK sub-index.")
             return None, None, None, None
-    elif universe in ["Existing Portfolio", "Monitoring Portfolio", "US Portfolio"]:
+    elif universe in ["Existing Portfolio", "Monitoring Portfolio", "Screener List", "US Portfolio"]:
         if custom_benchmark and custom_tickers:
             benchmark = custom_benchmark
             sectors = [ticker for ticker in custom_tickers if ticker]
@@ -163,6 +163,7 @@ def get_data(universe, sector, timeframe, custom_tickers=None, custom_benchmark=
         else:
             st.error(f"Please provide at least one stock ticker and select a benchmark for your {universe}.")
             return None, None, None, None
+            
     elif universe == "FX":
         benchmark = "HKDUSD=X"
         sectors = ["GBPUSD=X", "EURUSD=X", "AUDUSD=X", "NZDUSD=X", "CADUSD=X", "CHFUSD=X", "JPYUSD=X", "CNYUSD=X",  "EURGBP=X", "AUDNZD=X", "AUDCAD=X", "NZDCAD=X", "DX-Y.NYB"]
