@@ -33,7 +33,8 @@ def get_preset_portfolio(portfolio_type):
     urls = {
         "Existing": "https://raw.githubusercontent.com/jasonckb/RRG_Jason/main/Existing%20Portfolio.txt",
         "Monitoring": "https://raw.githubusercontent.com/jasonckb/RRG_Jason/main/Monitoring%20Portfolio.txt",
-        "US": "https://raw.githubusercontent.com/jasonckb/RRG_Jason/main/US%20Portfolio.txt"
+        "US": "https://raw.githubusercontent.com/jasonckb/RRG_Jason/main/US%20Portfolio.txt",
+        "Screener": "https://raw.githubusercontent.com/jasonckb/RRG_Jason/main/Screener%20List"
     }
     try:
         return fetch_portfolio_from_github(urls[portfolio_type])
@@ -382,7 +383,7 @@ tail_length = st.sidebar.slider(
 
 st.sidebar.header("Universe Selection")
 
-universe_options = ["WORLD", "US", "US Sectors", "HK", "HK Sub-indexes", "Existing Portfolio", "Monitoring Portfolio", "US Portfolio", "FX"]
+universe_options = ["WORLD", "US", "US Sectors", "HK", "HK Sub-indexes", "Existing Portfolio", "Monitoring Portfolio", "Screener List", "US Portfolio", "FX"]
 universe_names = {
     "WORLD": "World", 
     "US": "US", 
@@ -391,6 +392,7 @@ universe_names = {
     "HK Sub-indexes": "HK Sub-indexes", 
     "Existing Portfolio": "Existing Portfolio",
     "Monitoring Portfolio": "Monitoring Portfolio",
+    "Screener List": "Screener List",
     "US Portfolio": "US Portfolio",
     "FX": "Foreign Exchange"
 }
@@ -438,7 +440,7 @@ elif selected_universe == "HK Sub-indexes":
     )
     if selected_hk_sector:
         sector = selected_hk_sector
-elif selected_universe in ["Existing Portfolio", "Monitoring Portfolio", "US Portfolio"]:
+elif selected_universe in ["Existing Portfolio", "Monitoring Portfolio", "Screener List", "US Portfolio"]:
     st.sidebar.subheader(f"{selected_universe}")
     
     if 'reset_tickers' not in st.session_state:
@@ -493,7 +495,7 @@ elif selected_universe in ["Existing Portfolio", "Monitoring Portfolio", "US Por
         key=f"{portfolio_key}_benchmark_selector"
     )
 
-    # Add Reset button
+    # Update the Reset button
     if st.sidebar.button(f"Reset to Preset {selected_universe}"):
         st.session_state[f'{portfolio_key}_tickers'] = get_preset_portfolio(selected_universe.split()[0])
         st.rerun()
